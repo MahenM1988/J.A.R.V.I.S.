@@ -1,5 +1,3 @@
-import os
-import subprocess
 import pygame
 import datetime
 import speech_recognition as sr
@@ -100,61 +98,25 @@ def get_system_info():
     ram_bytes = psutil.virtual_memory().total
     ram_str = format_capacity(ram_bytes)
 
-    # Get all disk partitions
-    partitions = psutil.disk_partitions()
-    disk_info_list = []
-
-    for partition in partitions:
-        try:
-            usage = psutil.disk_usage(partition.mountpoint)
-            disk_free = format_capacity(usage.free)
-            disk_total = format_capacity(usage.total)
-            disk_info_list.append(f"{partition.mountpoint} {disk_free} free of {disk_total}")
-        except PermissionError:
-            continue  # Skip partitions that are not ready or accessible
-
-    disk_info = "\n".join(disk_info_list)
+    disks = psutil.disk_partitions()
+    disk_details = []
+    for d in disks:
+        disk_usage = psutil.disk_usage(d.mountpoint)
+        disk_details.append(f"{d.device} {disk_usage.free / (1024 ** 3):.2f}GB free of {disk_usage.total / (1024 ** 3):.2f}GB")
 
     graphics_info = get_gpu_info()
     network_type = "LAN" if psutil.net_if_stats().get('Ethernet', False).isup else "WIFI"
 
-    return (f"Processor: {cpu_info}, {cpu_cores} cores, @ {psutil.cpu_freq().current:.2f} GHz\n"
-            f"Available RAM: {ram_str}\n"
-            f"Disk Drives Online: {disk_info}\n"
+    return (f"Processor: {cpu_info}, {cpu_cores} cores, {psutil.cpu_freq().current:.2f} GHz\n"
+            f"Installed RAM: {ram_str}\n"
+            f"Hard Disk(s): {', '.join(disk_details)}\n"
             f"Display Adapter: {graphics_info}\n"
             f"Network Connectivity: {network_type}")
-
-# Function to list all files and folders recursively
-def list_files_and_folders(directory):
-    items = []
-    try:
-        for root, dirs, files in os.walk(directory):
-            items.extend([os.path.join(root, d) for d in dirs])
-            items.extend([os.path.join(root, f) for f in files])
-        return items
-    except Exception as e:
-        return []
-
-# Function to play a file
-def play_file(file_path):
-    try:
-        # Check if the file is an audio/video file
-        if file_path.lower().endswith(('.mp4', '.mp3', '.wav', '.avi', '.mkv', '.wmv')):
-            os.startfile(file_path)  # Execute the file with the associated application
-            print(f"Playing: {file_path}")
-        else:
-            print(f"Unsupported file type: {file_path}")
-    except Exception as e:
-        print(f"Failed to play {file_path}: {str(e)}")
-
 
 # Main function
 def main():
     api_key = "e36d7c17f13269895f55267fe99a743a"  # Replace with your OpenWeatherMap API Key
     use_console = input("Would you like to use the console (C) or speech recognition (S)? ").strip().upper()
-
-    # Hardcoded directory
-    directory_to_check = r"C:\Users\Mahen Mahindaratne\Desktop\Entertainment"  # Change to your desired directory
 
     weather_data = get_weather(api_key)
     if weather_data:
@@ -172,7 +134,7 @@ def main():
     date = current_date()
     time = current_time()
 
-    response_text = (f"{greeting} the current date and time in Colombo, Sri Lanka, is {date}, {time}. "
+    response_text = (f"{greeting} the current date and time in Colombo, Sri Lanka is {date}, {time}. "
                      f"The temperature is {temperature} degrees Celsius, with a humidity of {humidity}%, "
                      f"an atmospheric pressure of {pressure} hPa, and with {weather_description}. "
                      "How may I assist you today?")
@@ -190,34 +152,8 @@ def main():
         if user_input.lower() == "exit":
             break
         
-        if "access entertainment library" in user_input.lower():
-            print("Loading Content...")
-            speak("Loading Content...")
-            files_and_folders = list_files_and_folders(directory_to_check)
-            print("Files and Folders:")
-            for item in files_and_folders:
-                print(item)
-
-            current_index = 0
-            while True:
-                command = input("Type 'next' for next item, 'play [file name]' to play, or 'exit' to leave: ")
-                if command.lower() == "next":
-                    current_index += 1
-                    if current_index >= len(files_and_folders):
-                        current_index = 0  # Loop back to the start
-                    print(files_and_folders[current_index])
-                elif command.lower().startswith("play "):
-                    file_name = command[5:].strip()  # Get the name after "play "
-                    file_path = os.path.join(directory_to_check, file_name)
-                    if os.path.isfile(file_path):
-                        play_file(file_path)
-                    else:
-                        print(f"File not found: {file_name}")
-                elif command.lower() == "exit":
-                    break
-
-        elif any(keyword in user_input.lower() for keyword in ["system info", "system details", "system specifications"]):
-            print("Bringing up the system details now:")
+        if any(keyword in user_input.lower() for keyword in ["system info", "system details", "system specifications"]):
+            print(f"Bringing up the system details now:")
             speak("Bringing up the system details now:")
             system_info = get_system_info()
             print(system_info)
