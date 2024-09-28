@@ -98,7 +98,7 @@ def play_file(file_path):
 
 # Main function
 def main():
-    api_key = "e36d7c17f13269895f55267fe99a743a"  # Replace with your OpenWeatherMap API Key
+    api_key = ""  # Replace with your OpenWeatherMap API Key
     use_console = input("Would you like to use the console (C) or speech recognition (S)? ").strip().upper()
 
     # Start the other scripts
@@ -107,7 +107,7 @@ def main():
         subprocess.Popen(['python', script])  # Run each script in the background
 
     # Hardcoded directory
-    directory_to_check = r"C:\Users\Mahen Mahindaratne\Desktop\Entertainment"  # Change to your desired directory
+    directory_to_check = r""  # Change to your desired directory
 
     weather_data = get_weather(api_key)
     if weather_data:
