@@ -115,7 +115,7 @@ def get_system_info():
 
 # Main function
 def main():
-    api_key = ""  # Replace with your OpenWeatherMap API Key
+    api_key = os.environ.get('WEATHER_API_KEY') # Replace with your OpenWeatherMap API Key
     use_console = input("Would you like to use the console (C) or speech recognition (S)? ").strip().upper()
 
     weather_data = get_weather(api_key)
