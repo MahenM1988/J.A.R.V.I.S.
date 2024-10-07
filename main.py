@@ -71,12 +71,12 @@ def recognize_speech():
             return "Could not process command."
         
 def list_files_and_folders(directory):
-    items = []
     try:
-        for root, dirs, files in os.walk(directory):
-            items.extend([os.path.join(root, d) for d in dirs])
-            items.extend([os.path.join(root, f) for f in files])
-        return items
+        items = os.listdir(directory)
+        # Separate folders and files
+        folders = [os.path.join(directory, item) for item in items if os.path.isdir(os.path.join(directory, item))]
+        files = [os.path.join(directory, item) for item in items if os.path.isfile(os.path.join(directory, item))]
+        return sorted(folders) + sorted(files)  # Sort folders and files separately
     except Exception as e:
         print(f"Error listing files: {e}")
         return []
@@ -91,30 +91,48 @@ def play_file(file_path):
     except Exception as e:
         print(f"Failed to play {file_path}: {str(e)}")
 
-def access_main_server(directory):
+def access_main_server(start_directory):
+    current_directory = start_directory
     print("Accessing Main Server...")
-    files_and_folders = list_files_and_folders(directory)
-    print("Files and Folders:")
-    for item in files_and_folders:
-        print(item)
-
-    current_index = 0
+    
     while True:
-        command = input("Type 'next' for next item, 'play [file name]' to play, or 'exit' to leave: ")
-        if command.lower() == "next":
-            current_index += 1
-            if current_index >= len(files_and_folders):
-                current_index = 0
-            print(files_and_folders[current_index])
+        items = list_files_and_folders(current_directory)
+        print("\nFiles and Folders:")
+        for item in items:
+            print(f"- {os.path.basename(item)}")
+
+        print("\nType a file or folder name to select it, 'up' to go up a directory, 'play [file name]' to play, or 'exit' to leave:")
+        
+        command = input("Your command: ").strip()
+        
+        if command.lower() == "exit":
+            break
+        elif command.lower() == "up":
+            current_directory = os.path.dirname(current_directory)
+            print(f"Going up to: {current_directory}")
         elif command.lower().startswith("play "):
             file_name = command[5:].strip()  # Get the name after "play "
-            file_path = os.path.join(directory, file_name)
+            file_path = os.path.join(current_directory, file_name)
             if os.path.isfile(file_path):
                 play_file(file_path)
             else:
                 print(f"File not found: {file_name}")
-        elif command.lower() == "exit":
-            break
+        else:
+            selected_item = None
+            for item in items:
+                if os.path.basename(item).lower() == command.lower():
+                    selected_item = item
+                    break
+            
+            if selected_item:
+                if os.path.isdir(selected_item):
+                    current_directory = selected_item
+                elif os.path.isfile(selected_item):
+                    play_file(selected_item)
+                else:
+                    print(f"Unknown item: {selected_item}")
+            else:
+                print("No matching file or folder found. Please try again.")
 
 def report_current_datetime():
     date = current_date()

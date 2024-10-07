@@ -25,10 +25,12 @@ def get_top_headlines():
 def fetch_news_headlines(speak_function):
     news_headlines = get_top_headlines()
     if news_headlines:
-        headlines_text = "Here are the top news headlines:\n"
-        for article in news_headlines[:10]:  # Limit to 10 headlines
-            headlines_text += f"{article['title']}\n"
+        headlines_text = "In the World News Today:\n"
+        for index, article in enumerate(news_headlines[:10], start=1):  # Start numbering from 1
+            headlines_text += f"{index}. {article['title']}\n"
         print(headlines_text)
-        speak_function(headlines_text)  # Pass the speak function as an argument
+        speak_function("Fetching the top news headlines now")  
     else:
         print("Unable to fetch news headlines at the moment.")
+
+
