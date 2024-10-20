@@ -34,6 +34,6 @@ When the app starts, it extends a time-based greeting using the local date and t
 There are two main versions in this repository:
 
 - **J.A.R.V.I.S..py**: Contains the entire code in one application.
-- **Main.py**: Components have also been split and linked via this file.
+- **main.py**: Components have also been split and linked via this file.
 
 Additionally, **F.R.I.D.A.Y.A.py** and **S.A.T.U.R.D.A.Y..py** were in development and may not have been fully debugged.
